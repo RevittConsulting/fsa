@@ -1,0 +1,23 @@
+{{ define "email" }}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Login Code ({{ .AppName }})</title>
+    </head>
+    <body>
+    <div style="width: 60%; margin: auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="font-size: 22px; font-weight: bold; color: #555;">
+            <span style="color: #008080; font-size: 22px;">{{ .AppNameL1 }}</span>{{ .AppNameEnd }}.
+        </h1>
+        <hr style="border: 0; border-top: 1px solid #ccc;">
+        <p>Here is your login code: <strong style="color: #008080;">{{ .Code }}</strong></p>
+        <p>Please click the button below to log in.</p>
+        <a href="{{ .Link }}" style="display: inline-block; padding: 10px 20px; margin: 10px 0px; color: #fff; background: linear-gradient(to right, #008080, #999); border-radius: 5px; text-decoration: none;">Login</a>
+    </div>
+    <div style="width: 60%; margin: auto; padding: 20px; font-family: Arial, sans-serif; text-align: center;">
+        <hr style="border: 0; border-top: 1px solid #ccc;">
+        <p> <span style="color: #008080; font-size: 22px;">{{ .AppNameL1 }}</span>{{ .AppNameEnd }}.</p>
+    </div>
+    </body>
+    </html>
+{{ end }}
