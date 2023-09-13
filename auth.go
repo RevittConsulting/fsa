@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"bytes"
-	"path/filepath"
-	"runtime"
-	"html/template"
 	"context"
 	"github.com/golang-jwt/jwt/v4"
+	"html/template"
+	"path/filepath"
+	"runtime"
 )
 
 type IAuthDb interface {
@@ -26,6 +26,10 @@ type IUserCreator interface {
 
 type ICodeSender interface {
 	Send(to string, subject string, body string) error
+}
+
+type IEmailValidator interface {
+	Validate(email string) bool
 }
 
 type Key string
@@ -70,17 +74,19 @@ type Auth struct {
 	Db     IAuthDb
 	Sender ICodeSender
 	Uc     IUserCreator
+	Ev     IEmailValidator
 
 	EmailTemplate *template.Template
 
 	Cfg *Config
 }
 
-func New(db IAuthDb, sender ICodeSender, uc IUserCreator, et *template.Template, cfg *Config) *Auth {
+func New(db IAuthDb, sender ICodeSender, uc IUserCreator, ev IEmailValidator, et *template.Template, cfg *Config) *Auth {
 	return &Auth{
 		Db:     db,
 		Sender: sender,
 		Uc:     uc,
+		Ev:     ev,
 
 		EmailTemplate: et,
 
@@ -89,10 +95,16 @@ func New(db IAuthDb, sender ICodeSender, uc IUserCreator, et *template.Template,
 }
 
 func NewWithMemDbAndDefaultTemplate(sender ICodeSender, uc IUserCreator, cfg *Config) *Auth {
-	return New(NewMemDb(), sender, uc, nil, cfg)
+	return New(NewMemDb(), sender, uc, NewEmailValidator(), nil, cfg)
 }
 
 func (a *Auth) LoginStep1SendVerificationCode(ctx context.Context, email, returnUrl string) error {
+
+	validEmail := a.Ev.Validate(email)
+	if !validEmail {
+		return fmt.Errorf("invalid email")
+	}
+
 	code := generateCode()
 	expiresAt := time.Now().Add(a.Cfg.CodeValidityPeriod)
 

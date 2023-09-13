@@ -23,6 +23,9 @@ This is an interface which should satisfy the requirement for creating a user in
 ## ICodeSender
 This is an interface which should satisfy the requirement for sending a code to a user, for example it could send to a queue, or via SMTP/SMS API.
 
+## IEmailValidator
+This is an interface which should satisfy the requirement for validating the email address provided by the user, for example `email@domain..com` would not be a valid email where as `email@domain.com` would be valid.
+
 ## Todo
 
 - [ ] Pass in CORS config to the middleware
