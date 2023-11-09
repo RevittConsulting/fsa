@@ -32,6 +32,10 @@ type IEmailValidator interface {
 	Validate(email string) bool
 }
 
+type IUserVerifier interface {
+	CanLogin(condition bool) bool
+}
+
 type Key string
 
 const ClaimsKey Key = "claims"
@@ -50,6 +54,8 @@ type Config struct {
 	RateLimitPerSecond int
 
 	ReturnUrls []string
+
+	AllowAllLogins bool
 }
 
 type Token struct {
@@ -75,18 +81,20 @@ type Auth struct {
 	Sender ICodeSender
 	Uc     IUserCreator
 	Ev     IEmailValidator
+	Uv     IUserVerifier
 
 	EmailTemplate *template.Template
 
 	Cfg *Config
 }
 
-func New(db IAuthDb, sender ICodeSender, uc IUserCreator, ev IEmailValidator, et *template.Template, cfg *Config) *Auth {
+func New(db IAuthDb, sender ICodeSender, uc IUserCreator, ev IEmailValidator, uv IUserVerifier, et *template.Template, cfg *Config) *Auth {
 	return &Auth{
 		Db:     db,
 		Sender: sender,
 		Uc:     uc,
 		Ev:     ev,
+		Uv:     uv,
 
 		EmailTemplate: et,
 
@@ -95,7 +103,7 @@ func New(db IAuthDb, sender ICodeSender, uc IUserCreator, ev IEmailValidator, et
 }
 
 func NewWithMemDbAndDefaultTemplate(sender ICodeSender, uc IUserCreator, cfg *Config) *Auth {
-	return New(NewMemDb(), sender, uc, NewEmailValidator(), nil, cfg)
+	return New(NewMemDb(), sender, uc, NewEmailValidator(), NewUserVerifier(), nil, cfg)
 }
 
 func (a *Auth) LoginStep1SendVerificationCode(ctx context.Context, email, returnUrl string) error {
@@ -103,6 +111,11 @@ func (a *Auth) LoginStep1SendVerificationCode(ctx context.Context, email, return
 	validEmail := a.Ev.Validate(email)
 	if !validEmail {
 		return fmt.Errorf("invalid email")
+	}
+
+	canLogin := a.Uv.CanLogin(a.Cfg.AllowAllLogins)
+	if !canLogin {
+		return fmt.Errorf("user cannot login")
 	}
 
 	code := generateCode()
