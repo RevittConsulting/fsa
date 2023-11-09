@@ -2,8 +2,8 @@ package auth
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
 	"reflect"
 )
 
@@ -24,7 +24,11 @@ func WriteJSON(w http.ResponseWriter, v interface{}) {
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	w.Write(j)
+	_, err = w.Write(j)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func WriteErr(w http.ResponseWriter, err error, code int) {
