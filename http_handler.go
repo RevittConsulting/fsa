@@ -13,7 +13,7 @@ type Handler struct {
 	auth *Auth
 }
 
-func NewHandler(r *chi.Mux, auth *Auth) *Handler {
+func NewHandler(r chi.Router, auth *Auth) *Handler {
 	h := &Handler{
 		auth: auth,
 	}
@@ -21,7 +21,7 @@ func NewHandler(r *chi.Mux, auth *Auth) *Handler {
 	return h
 }
 
-func (h *Handler) SetupRoutes(router *chi.Mux) {
+func (h *Handler) SetupRoutes(router chi.Router) {
 	fmt.Println("setting up routes for auth")
 
 	limiter := tollbooth.NewLimiter(float64(h.auth.Cfg.RateLimitPerSecond), nil)
