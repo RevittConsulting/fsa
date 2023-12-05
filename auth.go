@@ -8,10 +8,11 @@ import (
 
 	"bytes"
 	"context"
-	"github.com/golang-jwt/jwt/v4"
 	"html/template"
 	"path/filepath"
 	"runtime"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type IAuthDb interface {
@@ -134,7 +135,7 @@ func (a *Auth) LoginStep1SendVerificationCode(ctx context.Context, email, return
 	err = a.Sender.Send(email, "Login Verification Code", body)
 	if err != nil {
 		err = a.Db.RemoveVerificationCode(email)
-		return err
+		return fmt.Errorf("failed to send code: %w", err)
 	}
 
 	return nil
