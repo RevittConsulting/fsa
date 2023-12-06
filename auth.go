@@ -134,7 +134,10 @@ func (a *Auth) LoginStep1SendVerificationCode(ctx context.Context, email, return
 	body := a.ParseTemplate(link, code)
 	err = a.Sender.Send(email, "Login Verification Code", body)
 	if err != nil {
-		err = a.Db.RemoveVerificationCode(email)
+		removalErr := a.Db.RemoveVerificationCode(email)
+		if removalErr != nil {
+			return fmt.Errorf("failed to send code: %w; also failed to remove verification code: %v", err, removalErr)
+		}
 		return fmt.Errorf("failed to send code: %w", err)
 	}
 
