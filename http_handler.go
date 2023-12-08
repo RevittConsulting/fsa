@@ -3,10 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/go-chi/chi"
-	"github.com/didip/tollbooth_chi"
-	"github.com/didip/tollbooth/v7"
+	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
