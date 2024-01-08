@@ -44,6 +44,7 @@ const UserEmailKey Key = "userEmail"
 
 type Config struct {
 	AppName string
+	Logo    string
 
 	CodeValidityPeriod         time.Duration
 	AccessTokenValidityPeriod  time.Duration
@@ -75,6 +76,7 @@ type EmailData struct {
 	AppName    string
 	AppNameL1  string
 	AppNameEnd string
+	Logo       string
 }
 
 type Auth struct {
@@ -275,6 +277,7 @@ func (a *Auth) ParseTemplate(link, code string) string {
 		Link:    link,
 		Code:    code,
 		AppName: a.Cfg.AppName,
+		Logo:    a.Cfg.Logo,
 	}
 
 	r := []rune(a.Cfg.AppName)
