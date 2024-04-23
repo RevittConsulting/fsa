@@ -2,12 +2,18 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v4"
+)
+
+var (
+	ErrorAuthHeaderMissing = errors.New("authorization header is missing")
+	ErrorInvalidAuthHeader = errors.New("invalid authorization header format")
 )
 
 type AuthMiddleware struct {
@@ -24,13 +30,13 @@ func (am *AuthMiddleware) VerifyAuthenticationToken(next http.Handler) http.Hand
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Authorization header is missing", http.StatusUnauthorized)
+			http.Error(w, ErrorAuthHeaderMissing.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		splitToken := strings.Split(authHeader, "Bearer ")
 		if len(splitToken) != 2 {
-			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
+			http.Error(w, ErrorInvalidAuthHeader.Error(), http.StatusUnauthorized)
 			return
 		}
 
