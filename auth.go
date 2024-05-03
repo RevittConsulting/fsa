@@ -43,8 +43,10 @@ const ClaimsKey Key = "claims"
 const UserEmailKey Key = "userEmail"
 
 type Config struct {
-	AppName string
-	Logo    string
+	AppName   string
+	Logo      string
+	Brand     string
+	BrandLink string
 
 	CodeValidityPeriod         time.Duration
 	AccessTokenValidityPeriod  time.Duration
@@ -77,6 +79,8 @@ type EmailData struct {
 	AppNameL1  string
 	AppNameEnd string
 	Logo       string
+	Brand      string
+	BrandLink  string
 }
 
 type Auth struct {
@@ -274,10 +278,12 @@ func createRefreshToken(email, secret string, validityPeriod time.Duration) (*To
 
 func (a *Auth) ParseTemplate(link, code string) string {
 	data := EmailData{
-		Link:    link,
-		Code:    code,
-		AppName: a.Cfg.AppName,
-		Logo:    a.Cfg.Logo,
+		Link:      link,
+		Code:      code,
+		AppName:   a.Cfg.AppName,
+		Logo:      a.Cfg.Logo,
+		Brand:     a.Cfg.Brand,
+		BrandLink: a.Cfg.BrandLink,
 	}
 
 	r := []rune(a.Cfg.AppName)
