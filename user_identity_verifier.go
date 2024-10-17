@@ -1,4 +1,4 @@
-package auth
+package fsa
 
 type UserIdentityVerifier struct {
 	Uv IUserIdentityVerifier
