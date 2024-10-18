@@ -218,6 +218,7 @@ func (a *Auth) RefreshToken(ctx context.Context, rt string) (*TokenResponse, err
 	}
 
 	accessToken, err := createToken(map[string]interface{}{
+		"id":    id,
 		"email": email,
 	}, a.Cfg.AccessTokenSecret, a.Cfg.AccessTokenValidityPeriod)
 	if err != nil {
