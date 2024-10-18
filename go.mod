@@ -9,4 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 )
 
-require github.com/go-pkgz/expirable-cache/v3 v3.0.0 // indirect
+require (
+	github.com/go-pkgz/expirable-cache/v3 v3.0.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+)

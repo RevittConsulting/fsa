@@ -8,6 +8,7 @@ import (
 
 	"bytes"
 	"context"
+	"github.com/google/uuid"
 	"html/template"
 	"path/filepath"
 	"runtime"
@@ -22,7 +23,7 @@ type IAuthDb interface {
 }
 
 type IUserCreator interface {
-	CreateEmailVerifiedUserIfNotExists(ctx context.Context, email string) (newUser bool, err error)
+	CreateEmailVerifiedUserIfNotExists(ctx context.Context, email string) (id uuid.UUID, newUser bool, err error)
 }
 
 type ICodeSender interface {
@@ -41,6 +42,7 @@ type Key string
 
 const ClaimsKey Key = "claims"
 const UserEmailKey Key = "userEmail"
+const UserIdKey Key = "userId"
 
 type Config struct {
 	AppName   string
@@ -164,7 +166,7 @@ func (a *Auth) LoginStep2ConfirmCode(ctx context.Context, email string, code str
 	}
 
 	// create user if not exists
-	_, err = a.Uc.CreateEmailVerifiedUserIfNotExists(ctx, email)
+	id, _, err := a.Uc.CreateEmailVerifiedUserIfNotExists(ctx, email)
 	if err != nil {
 		return false, nil, err
 	}
@@ -176,7 +178,7 @@ func (a *Auth) LoginStep2ConfirmCode(ctx context.Context, email string, code str
 		return false, nil, err
 	}
 
-	refreshToken, err := createRefreshToken(email, a.Cfg.RefreshTokenSecret, a.Cfg.RefreshTokenValidityPeriod)
+	refreshToken, err := createRefreshToken(id, email, a.Cfg.RefreshTokenSecret, a.Cfg.RefreshTokenValidityPeriod)
 	if err != nil {
 		return false, nil, err
 	}
@@ -205,6 +207,16 @@ func (a *Auth) RefreshToken(ctx context.Context, rt string) (*TokenResponse, err
 		return nil, fmt.Errorf("invalid claims")
 	}
 
+	id, ok := claims["id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid claims")
+	}
+
+	idUUID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+
 	accessToken, err := createToken(map[string]interface{}{
 		"email": email,
 	}, a.Cfg.AccessTokenSecret, a.Cfg.AccessTokenValidityPeriod)
@@ -212,7 +224,7 @@ func (a *Auth) RefreshToken(ctx context.Context, rt string) (*TokenResponse, err
 		return nil, err
 	}
 
-	refreshToken, err := createRefreshToken(email, a.Cfg.RefreshTokenSecret, a.Cfg.RefreshTokenValidityPeriod)
+	refreshToken, err := createRefreshToken(idUUID, email, a.Cfg.RefreshTokenSecret, a.Cfg.RefreshTokenValidityPeriod)
 	if err != nil {
 		return nil, err
 	}
@@ -253,12 +265,13 @@ func createToken(claims map[string]interface{}, secret string, validityPeriod ti
 	}, nil
 }
 
-func createRefreshToken(email, secret string, validityPeriod time.Duration) (*Token, error) {
+func createRefreshToken(id uuid.UUID, email, secret string, validityPeriod time.Duration) (*Token, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	expiresAt := time.Now().Add(validityPeriod)
 
 	claims := jwt.MapClaims{
+		"id":    id.String(),
 		"email": email,
 		"exp":   expiresAt.Unix(),
 	}
