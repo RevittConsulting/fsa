@@ -49,6 +49,7 @@ func (am *AuthMiddleware) VerifyAuthenticationToken(next http.Handler) http.Hand
 
 		ctx := context.WithValue(r.Context(), ClaimsKey, claims)
 		ctx = context.WithValue(ctx, UserEmailKey, claims["email"])
+		ctx = context.WithValue(ctx, UserIdKey, claims["id"])
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
