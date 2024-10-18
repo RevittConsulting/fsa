@@ -172,6 +172,7 @@ func (a *Auth) LoginStep2ConfirmCode(ctx context.Context, email string, code str
 	}
 
 	accessToken, err := createToken(map[string]interface{}{
+		"id":    id,
 		"email": email,
 	}, a.Cfg.AccessTokenSecret, a.Cfg.AccessTokenValidityPeriod)
 	if err != nil {
